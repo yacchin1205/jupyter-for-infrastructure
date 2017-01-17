@@ -93,8 +93,8 @@ RUN curl -L https://github.com/NII-cloud-operation/Jupyter-multi_outputs/archive
 RUN mkdir -p $HOME/.jupyter/nbconfig && \
     cp /tmp/notebook.json $HOME/.jupyter/nbconfig/notebook.json
 
-## nbextension_i18n (NII) - https://github.com/yacchin1205/nbextension_i18n
-RUN pip install git+https://github.com/yacchin1205/nbextension_i18n.git && \
+## nbextension_i18n_cells (NII) - https://github.com/NII-cloud-operation/Jupyter-i18n_cells
+RUN pip install git+https://github.com/NII-cloud-operation/Jupyter-i18n_cells.git && \
     jupyter nbextension install --py nbextension_i18n_cells && \
     jupyter nbextension enable --py nbextension_i18n_cells
 
