@@ -31,7 +31,7 @@ ENV LANGUAGE en_US.UTF-8
 
 # jupyter
 RUN bash -c 'apt-get update && apt-get install -yq --no-install-recommends \
-             curl python2.7-dev python2.7 && \
+             curl python2.7-dev python2.7 build-essential && \
              curl -L https://bootstrap.pypa.io/get-pip.py | python2.7 && \
              apt-get clean && rm -rf /var/lib/apt/lists/*'
 
@@ -42,7 +42,6 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     vim \
     jed \
     emacs \
-    build-essential \
     unzip \
     libsm6 \
     pandoc \
@@ -70,7 +69,7 @@ RUN pip install pandas matplotlib numpy \
 
 # ansible
 RUN apt-get update && \
-    apt-get -y install sshpass openssl ipmitool libssl-dev && \
+    apt-get -y install sshpass openssl ipmitool libssl-dev build-essential && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     pip install requests paramiko ansible && \
     cat /tmp/sitecustomize.py >> \
