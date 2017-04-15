@@ -29,6 +29,14 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
+# Create 'bit_kun' user
+ENV NB_USER bit_kun
+ENV NB_UID 1000
+RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER && \
+    mkdir /home/$NB_USER/.jupyter && \
+    chown -R $NB_USER:users /home/$NB_USER/.jupyter && \
+    echo "$NB_USER ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/$NB_USER
+
 # jupyter
 RUN bash -c 'apt-get update && apt-get install -yq --no-install-recommends \
              curl python2.7-dev python2.7 build-essential && \
@@ -58,10 +66,12 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 ADD conf /tmp/
+USER $NB_USER
 RUN mkdir -p $HOME/.jupyter && \
     cp -f /tmp/jupyter_notebook_config.py \
        $HOME/.jupyter/jupyter_notebook_config.py
 
+USER root
 RUN pip install pandas matplotlib numpy \
                 seaborn scipy scikit-learn scikit-image \
                 sympy cython patsy \
@@ -81,8 +91,9 @@ RUN mkdir -p /etc/ansible && cp /tmp/ansible.cfg /etc/ansible/ansible.cfg
 RUN pip install jupyter_nbextensions_configurator
 RUN mkdir -p $HOME/.local/share && \
     pip install six \
-    https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tarball/master && \
-    jupyter contrib nbextension install --user
+    https://github.com/ipython-contrib/jupyter_contrib_nbextensions/tarball/master
+USER $NB_USER
+RUN jupyter contrib nbextension install --user
 
 ## Jupyter-multi_outputs (NII) - https://github.com/NII-cloud-operation/Jupyter-multi_outputs
 RUN curl -L https://github.com/NII-cloud-operation/Jupyter-multi_outputs/archive/feature/merge_code_cell_status_extension.zip > /tmp/archive.zip && \
@@ -93,15 +104,17 @@ RUN mkdir -p $HOME/.jupyter/nbconfig && \
     cp /tmp/notebook.json $HOME/.jupyter/nbconfig/notebook.json
 
 ## nbextension_i18n_cells (NII) - https://github.com/NII-cloud-operation/Jupyter-i18n_cells
-RUN pip install git+https://github.com/NII-cloud-operation/Jupyter-i18n_cells.git && \
-    jupyter nbextension install --py nbextension_i18n_cells && \
-    jupyter nbextension enable --py nbextension_i18n_cells
+USER root
+RUN pip install git+https://github.com/NII-cloud-operation/Jupyter-i18n_cells.git
+USER $NB_USER
+RUN jupyter nbextension install --py nbextension_i18n_cells --user && \
+    jupyter nbextension enable --py nbextension_i18n_cells --user
 
 # Theme for jupyter
-RUN mkdir -p /root/.jupyter/custom/ && \
-    cp /tmp/custom.css /root/.jupyter/custom/custom.css
+RUN mkdir -p $HOME/.jupyter/custom/ && \
+    cp /tmp/custom.css $HOME/.jupyter/custom/custom.css
 
-RUN mkdir -p /notebooks
-WORKDIR /notebooks
+RUN mkdir -p $HOME/notebooks
+WORKDIR $HOME/notebooks
 ENTRYPOINT ["tini", "--"]
 CMD ["jupyter", "notebook"]
