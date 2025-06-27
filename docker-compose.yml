@@ -1,10 +1,14 @@
 version: '2'
 services:
   notebook:
-    build: ./jupyter
+    image: yacchin1205/lc4ri-for-public-cloud
     environment:
       TZ: Asia/Tokyo
+      GRANT_SUDO: 'yes'
+    user: root
     ports:
-      - '127.0.0.1:8888:8888'
+      - '127.0.0.1:8887:8888'
+    working_dir: /home/jovyan
     volumes:
-      - './notebooks:/notebooks'
+      - './notebooks:/home/jovyan'
+      - '/var/run/docker.sock:/var/run/docker.sock'
